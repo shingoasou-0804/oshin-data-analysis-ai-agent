@@ -1,0 +1,18 @@
+services:
+  agent:
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      # 任意: 実行リクエストを上書きしたい場合に利用
+      # USER_REQUEST: "data/sample.csv の売上を日別集計して可視化してください"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+      # prompts を src/prompts/ に置いているなら以下を有効化
+      - ./src/prompts:/app/src/prompts
+    tty: true
+    # 必要ならログ見やすさのため
+    # command: ["python", "-u", "main.py"]
