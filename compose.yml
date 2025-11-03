@@ -13,6 +13,11 @@ services:
       - ./src:/app/src
       # prompts を src/prompts/ に置いているなら以下を有効化
       - ./src/prompts:/app/src/prompts
+      # 開発用: コード変更を即座に反映
+      - ./main.py:/app/main.py
+      - ./scripts:/app/scripts
+      # 実行結果の保存先
+      - ./artifacts:/app/artifacts
     tty: true
     # 必要ならログ見やすさのため
     # command: ["python", "-u", "main.py"]

@@ -16,13 +16,17 @@ COPY pyproject.toml ./
 COPY uv.lock* ./
 RUN uv sync
 
+RUN useradd -m appuser
+
 COPY src ./src
 COPY main.py .
 COPY .env.example ./
 COPY data ./data
 COPY scripts ./scripts
 
-RUN useradd -m appuser
+# コピーしたファイルの所有権をappuserに変更
+RUN chown -R appuser:appuser /app
+
 USER appuser
 
 ENV PYTHONUNBUFFERED=1 \
