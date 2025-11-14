@@ -1,10 +1,16 @@
+from src.llms.apis import openai
+from src.llms.models import LLMResponse
+from src.llms.utils import load_template
+from src.models import DataThread, Program
+
+
 def generate_code(
     data_info: str,
     user_request: str,
     remote_save_dir: str = "outputs/process_id/id",
     previous_thread: DataThread | None = None,
     model: str = "gpt-4o-mini-2024-07-18",
-    template_file: str = "src/prompts/generage_code.jinja"
+    template_file: str = "src/prompts/generate_code.jinja"
 ) -> LLMResponse:
     template = load_template(template_file)
     system_message = template.render(
@@ -20,8 +26,12 @@ def generate_code(
 
         if previous_thread.stdout and previous_thread.stderr:
             messages.extend([
-                {"role": "system", "content": f"stdout: {previous_thread.stdout}"},
-                {"role": "system", "content": f"stderr: {previous_thread.stderr}"},
+                {
+                    "role": "system",
+                    "content": f"stdout: {previous_thread.stdout}"},
+                {
+                    "role": "system",
+                    "content": f"stderr: {previous_thread.stderr}"},
             ])
         if previous_thread.observation:
             messages.append({
