@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-def LLMResponse(BaseModel):
+class LLMResponse(BaseModel):
     messages: list
     content: str | BaseModel
     model: str

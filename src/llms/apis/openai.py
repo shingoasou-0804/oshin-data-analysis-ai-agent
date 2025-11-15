@@ -30,9 +30,9 @@ def generate_response(
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     # LLM Call
+    content_idx = 1 if model.startswith(("o1", "o3")) else 0
     if response_format is None:
         completion = client.responses.create(model=model, input=messages)
-        content_idx = 1 if model.startswith(("o1", "o3")) else 0
         content = completion.output[content_idx].content[0].text
     else:
         completion = client.responses.parse(
