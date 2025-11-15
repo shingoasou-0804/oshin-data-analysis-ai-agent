@@ -1,22 +1,20 @@
 import sys
-
 from pathlib import Path
-from dotenv import load_dotenv
-from e2b_code_interpreter import Sandbox
 
-
+# プロジェクトルートをパスに追加（インポートの前に実行）
 root_dir = Path(__file__).resolve().parents[1]
 sys.path.append(str(root_dir))
 
+from dotenv import load_dotenv  # noqa: E402
+from e2b_code_interpreter import Sandbox  # noqa: E402
 
-from src.modules import execute_code, set_dataframe
-
+from src.modules import execute_code, set_dataframe  # noqa: E402
 
 load_dotenv()
 
 
 def main() -> None:
-    with Sandbox() as sandbox:
+    with Sandbox.create() as sandbox:
         with open("data/sample.csv", "rb") as fi:
             set_dataframe(sandbox=sandbox, file_object=fi)
         data_thread = execute_code(
