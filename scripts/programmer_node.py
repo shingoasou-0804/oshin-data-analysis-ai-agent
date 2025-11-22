@@ -22,6 +22,7 @@ def programmer_node(
     idx: int = 0,
 ) -> tuple[int, list[DataThread]]:
     template_file = "src/prompts/describe_dataframe.jinja"
+    remote_save_dir = f"outputs/{process_id}"
     with open(data_file, "rb") as fi:
         file_object = io.BytesIO(fi.read())
     data_info = describe_dataframe(
@@ -30,6 +31,11 @@ def programmer_node(
     )
     data_threads: list[DataThread] = []
     with Sandbox.create() as sandbox:
+        # 出力ディレクトリを作成
+        sandbox.run_code(
+            f"import os; os.makedirs('{remote_save_dir}', exist_ok=True)"
+        )
+
         with open(data_file, "rb") as fi:
             set_dataframe(
                 sandbox=sandbox,
@@ -42,6 +48,7 @@ def programmer_node(
                 user_request=user_request,
                 previous_thread=previous_thread,
                 model=model,
+                remote_save_dir=remote_save_dir,
             )
             program = response.content
             logger.info(program.model_dump_json())
@@ -62,6 +69,7 @@ def programmer_node(
                 data_info=data_info,
                 data_thread=data_thread,
                 model=model,
+                remote_save_dir=remote_save_dir,
             )
             review = response.content
             logger.info(review.model_dump_json())
