@@ -7,7 +7,7 @@ from loguru import logger
 root_dir = Path(__file__).resolve().parents[1]
 sys.path.append(str(root_dir))
 
-from scripts.programmer import programmer_node
+from scripts.programmer_node import programmer_node
 
 
 def main() -> None:
