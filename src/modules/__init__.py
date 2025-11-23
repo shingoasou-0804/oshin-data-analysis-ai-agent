@@ -3,6 +3,7 @@ from .generate_code import generate_code
 from .execute_code import execute_code
 from .set_dataframe import set_dataframe
 from .generate_review import generate_review
+from .generate_plan import generate_plan
 
 __all__ = [
     "describe_dataframe",
@@ -10,4 +11,5 @@ __all__ = [
     "execute_code",
     "set_dataframe",
     "generate_review",
+    "generate_plan",
 ]
