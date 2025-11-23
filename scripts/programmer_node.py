@@ -37,6 +37,22 @@ def programmer_node(
             f"import os; os.makedirs('{remote_save_dir}', exist_ok=True)"
         )
 
+        # 一般的なデータ分析ライブラリをインストール
+        common_libraries = [
+            "statsmodels",
+            "seaborn",
+            "scikit-learn",
+            "scipy",
+        ]
+        install_cmd = (
+            "import subprocess; "
+            "subprocess.run(['pip', 'install', '--quiet', '--upgrade', "
+            + ", ".join([f"'{lib}'" for lib in common_libraries])
+            + "], check=False)"
+        )
+        sandbox.run_code(install_cmd)
+        logger.info(f"一般的なライブラリをインストールしました: {common_libraries}")
+
         with open(data_file, "rb") as fi:
             set_dataframe(
                 sandbox=sandbox,
@@ -64,7 +80,26 @@ def programmer_node(
             if data_thread.stdout:
                 logger.info(f"{data_thread.stdout=}")
             if data_thread.stderr:
-                logger.warning(f"{data_thread.stderr=}")
+                # 無視すべき警告をフィルタリング
+                filtered_stderr = data_thread.stderr
+                ignored_warnings = [
+                    "Out of range float values are not JSON compliant",
+                    "FutureWarning",
+                    "Passing `palette` without assigning `hue`",
+                ]
+
+                should_ignore = any(
+                    warning in filtered_stderr for warning in ignored_warnings
+                )
+
+                if should_ignore:
+                    # これらの警告は無視（実行には影響しない）
+                    logger.debug(
+                        "無視可能な警告を検出（無視します）"
+                    )
+                elif filtered_stderr.strip():
+                    # その他のstderrは警告として表示
+                    logger.warning(f"{data_thread.stderr=}")
             response = generate_review(
                 user_request=user_request,
                 data_info=data_info,
@@ -76,6 +111,13 @@ def programmer_node(
             logger.info(review.model_dump_json())
             data_thread.observation = review.observation
             data_thread.is_completed = review.is_completed
+
+            # artifactsディレクトリのパスを決定
+            # process_idがsample-で始まる場合はplanフォルダに格納
+            if process_id.startswith("sample-"):
+                artifacts_base_dir = Path("artifacts") / "plan"
+            else:
+                artifacts_base_dir = Path("artifacts")
 
             # サンドボックス内の出力ファイルを取得
             try:
@@ -123,7 +165,7 @@ def programmer_node(
 
                             file_content = sandbox.files.read(file_path)
                             # ローカルのartifactsディレクトリに保存
-                            artifacts_dir = Path("artifacts") / process_id
+                            artifacts_dir = artifacts_base_dir / process_id
                             artifacts_dir.mkdir(parents=True, exist_ok=True)
                             local_path = artifacts_dir / Path(file_path).name
 
@@ -145,7 +187,7 @@ def programmer_node(
 
             # 実行結果の画像を保存
             if data_thread.results:
-                artifacts_dir = Path("artifacts") / process_id
+                artifacts_dir = artifacts_base_dir / process_id
                 artifacts_dir.mkdir(parents=True, exist_ok=True)
                 for result_idx, result in enumerate(data_thread.results):
                     if result.get("type") == "png" and result.get("content"):
