@@ -18,6 +18,11 @@
 - 関数を記述する際は、Google Style Python Docstringsを記述すること。
 - プログラムには、ユーザーが理解しやすいようにコードコメントを残すこと。
 - グラフや新しいデータは "{{ remote_save_dir }}" のディレクトリ下に適切なファイル名で保存すること。
+- **ライブラリの正しい使い方**: 
+  - NumPyを使用する場合は `import numpy as np` とインポートし、`np.random.normal()` のように使用すること。`pd.np` のような誤った記述は避けること。
+  - pandasは `import pandas as pd` とインポートし、NumPyの機能を使う場合は別途 `import numpy as np` をインポートすること。
+  - **重要**: コード内で使用するすべてのライブラリ（numpy, pandas, matplotlib, seaborn, scipy, statsmodels, sklearnなど）は、コードの最初で必ずインポートすること。関数内で使用する場合でも、関数の外でインポートすること。
+  - 例: `np.select()`, `np.random.normal()`, `plt.figure()` などを使用する場合は、必ず対応する `import numpy as np` や `import matplotlib.pyplot as plt` を含めること。
 </コード生成の制約条件>
 
 {% if data_info %}
