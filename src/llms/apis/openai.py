@@ -2,6 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from openai.types.responses import ResponseOutputRefusal
 from pydantic import BaseModel
 
 from src.llms.models.llm_response import LLMResponse
@@ -33,14 +34,26 @@ def generate_response(
     content_idx = 1 if model.startswith(("o1", "o3")) else 0
     if response_format is None:
         completion = client.responses.create(model=model, input=messages)
-        content = completion.output[content_idx].content[0].text
+        content_item = completion.output[content_idx].content[0]
+        if isinstance(content_item, ResponseOutputRefusal):
+            refusal_reason = getattr(
+                content_item, 'refusal', 'Unknown reason'
+            )
+            raise ValueError(f"API response was refused: {refusal_reason}")
+        content = content_item.text
     else:
         completion = client.responses.parse(
             model=model,
             input=messages,
             text_format=response_format,
         )
-        content = completion.output[content_idx].content[0].parsed
+        content_item = completion.output[content_idx].content[0]
+        if isinstance(content_item, ResponseOutputRefusal):
+            refusal_reason = getattr(
+                content_item, 'refusal', 'Unknown reason'
+            )
+            raise ValueError(f"API response was refused: {refusal_reason}")
+        content = content_item.parsed
 
     # Cost calculation
     input_cost = completion.usage.input_tokens * COST[model]["input"]
